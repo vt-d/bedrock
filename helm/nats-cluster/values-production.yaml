@@ -1,0 +1,40 @@
+# Example custom values for production deployment
+nats:
+  cluster:
+    replicas: 5  # Increase for production
+
+  jetstream:
+    enabled: true
+    fileStore:
+      pvc:
+        size: 100Gi  # Larger storage for production
+        storageClassName: "fast-ssd"
+
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: 2000m
+      memory: 4Gi
+
+  persistence:
+    size: 100Gi
+    storageClass: "fast-ssd"
+
+  config:
+    merge:
+      jetstream:
+        max_memory_store: 2GB
+        max_file_store: 100GB
+
+# Enable monitoring
+monitoring:
+  enabled: true
+  serviceMonitor:
+    enabled: true
+    namespace: "monitoring"
+
+# Security
+networkPolicy:
+  enabled: true

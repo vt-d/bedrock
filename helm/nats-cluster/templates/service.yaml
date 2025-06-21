@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "nats-cluster.fullname" . }}
+  labels:
+    {{- include "nats-cluster.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.nats.service.type | default "ClusterIP" }}
+  ports:
+  - port: {{ .Values.nats.service.ports.client | default 4222 }}
+    targetPort: client
+    protocol: TCP
+    name: client
+  - port: {{ .Values.nats.service.ports.monitor | default 8222 }}
+    targetPort: monitor
+    protocol: TCP
+    name: monitor
+  selector:
+    {{- include "nats-cluster.selectorLabels" . | nindent 4 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "nats-cluster.fullname" . }}-headless
+  labels:
+    {{- include "nats-cluster.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+  - port: {{ .Values.nats.service.ports.client | default 4222 }}
+    targetPort: client
+    protocol: TCP
+    name: client
+  - port: {{ .Values.nats.service.ports.cluster | default 6222 }}
+    targetPort: cluster
+    protocol: TCP
+    name: cluster
+  - port: {{ .Values.nats.service.ports.monitor | default 8222 }}
+    targetPort: monitor
+    protocol: TCP
+    name: monitor
+  selector:
+    {{- include "nats-cluster.selectorLabels" . | nindent 4 }}

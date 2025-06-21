@@ -1,0 +1,49 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "nats-cluster.fullname" . }}-config
+  labels:
+    {{- include "nats-cluster.labels" . | nindent 4 }}
+data:
+  nats.conf: |
+    # NATS Server Configuration
+    server_name: {{ include "nats-cluster.fullname" . }}-$(POD_NAME)
+    port: {{ .Values.nats.config.port | default 4222 }}
+    http_port: {{ .Values.nats.config.http_port | default 8222 }}
+    
+    # Logging
+    debug: {{ if eq (.Values.nats.config.log_level | default "info") "debug" }}true{{ else }}false{{ end }}
+    trace: {{ if eq (.Values.nats.config.log_level | default "info") "trace" }}true{{ else }}false{{ end }}
+    logtime: true
+    
+    # JetStream Configuration
+    {{- if .Values.nats.jetstream.enabled }}
+    jetstream {
+      store_dir: {{ .Values.nats.config.merge.jetstream.store_dir | default "/data" | quote }}
+      max_memory_store: {{ .Values.nats.config.merge.jetstream.max_memory_store | default "256MB" }}
+      max_file_store: {{ .Values.nats.config.merge.jetstream.max_file_store | default "1GB" }}
+    }
+    {{- end }}
+    
+    # Cluster Configuration
+    {{- if .Values.nats.cluster.enabled }}
+    cluster {
+      name: {{ .Values.nats.cluster.name | default "nats-cluster" }}
+      port: {{ .Values.nats.config.cluster.port | default 6222 }}
+      
+      {{- if gt (int .Values.nats.cluster.replicas) 1 }}
+      routes = [
+        {{- range $i := until (int .Values.nats.cluster.replicas) }}
+        nats://{{ include "nats-cluster.fullname" $ }}-{{ $i }}.{{ include "nats-cluster.fullname" $ }}-headless:6222
+        {{- end }}
+      ]
+      {{- end }}
+    }
+    {{- end }}
+    
+    # Server limits
+    max_connections: 64K
+    max_control_line: 4KB
+    max_payload: 1MB
+    max_pending: 64MB
+    max_subscriptions: 0
