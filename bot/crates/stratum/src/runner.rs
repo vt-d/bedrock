@@ -1,4 +1,5 @@
 use async_nats;
+use backoff::{future::retry, Error as BackoffError, ExponentialBackoff};
 use futures_util::StreamExt;
 use tracing::{error, info, span, trace, Level};
 use twilight_gateway::{Message, Shard};
@@ -10,14 +11,18 @@ pub async fn runner(mut shard: Shard, nats_client: async_nats::Client) {
     info!("Starting Discord shard runner");
 
     let subject = format!("discord.shards.{}.startup", shard.id().number());
-    if let Err(e) = nats_client
-        .publish(
-            subject,
-            format!("Shard {} is starting", shard.id().number()).into(),
-        )
-        .await
-    {
-        error!(error = %e, "Failed to publish shard startup message to NATS");
+    let startup_message = format!("Shard {} is starting", shard.id().number());
+
+    let publish_op = || async {
+        nats_client
+            .publish(subject.clone(), startup_message.clone().into())
+            .await
+            .map_err(BackoffError::transient)
+    };
+
+    let backoff = ExponentialBackoff::default();
+    if let Err(e) = retry(backoff, publish_op).await {
+        error!(error = %e, "Failed to publish shard startup message to NATS after multiple retries");
     } else {
         info!(shard.id = shard.id().number(), "Published shard startup message to NATS");
     }
@@ -35,8 +40,16 @@ pub async fn runner(mut shard: Shard, nats_client: async_nats::Client) {
                 };
 
                 let subject = format!("discord.shards.{}.events", shard.id().number());
-                if let Err(e) = nats_client.publish(subject.clone(), bytes.clone().into()).await {
-                    error!(error = %e, "Failed to publish message to NATS");
+                let publish_op = || async {
+                    nats_client
+                        .publish(subject.clone(), bytes.clone().into())
+                        .await
+                        .map_err(BackoffError::transient)
+                };
+
+                let backoff = ExponentialBackoff::default();
+                if let Err(e) = retry(backoff, publish_op).await {
+                    error!(error = %e, "Failed to publish event to NATS after multiple retries");
                 } else {
                     trace!(subject = %subject, "Published event to NATS");
                 }
