@@ -1,0 +1,132 @@
+# Rust build artifacts
+target/
+bot/target/
+**/target/
+
+# Rust debug files
+**/*.pdb
+
+# Dependencies cache
+Cargo.lock
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Git
+.git/
+.gitignore
+
+# Documentation
+*.md
+README*
+CHANGELOG*
+LICENSE*
+docs/
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+Jenkinsfile
+
+# Docker
+Dockerfile*
+.dockerignore
+docker-compose*.yml
+
+# Kubernetes manifests (not needed in container)
+k8s/
+helm/
+crd/
+examples/
+
+# Scripts (not needed in container)
+scripts/
+
+# Tests
+**/tests/
+**/*_test.rs
+**/*_tests.rs
+
+# Benchmarks
+**/benches/
+
+# Examples (not the k8s examples, but Rust examples)
+**/examples/
+
+# Temporary files
+*.tmp
+*.temp
+.tmp/
+.temp/
+
+# Logs
+*.log
+logs/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Node.js (if any)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Python (if any)
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Coverage reports
+coverage/
+*.lcov
+
+# Backup files
+*.bak
+*.backup
+
+# Editor temp files
+.#*
+#*#
+
+# Local development
+.local/
+local/
+
+# Cache directories
+.cache/
+cache/
+
+# Build outputs that shouldn't be in container
+dist/
+build/
+out/
+
+# Kind clusters and local k8s
+.kube/
+kubeconfig*
+
+# NATS data
+nats-data/
+jetstream/

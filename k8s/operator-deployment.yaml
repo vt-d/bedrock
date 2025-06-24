@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: crust-operator
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: crust-operator
+  template:
+    metadata:
+      labels:
+        app: crust-operator
+    spec:
+      serviceAccountName: crust-operator
+      containers:
+      - name: operator
+        image: bedrock-operator:latest
+        imagePullPolicy: Never
+        env:
+        - name: NATS_URL
+          value: "nats://nats-cluster.nats-system.svc.cluster.local:4222"
+        - name: RUST_LOG
+          value: "info,crust=debug"
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "128Mi"
+            cpu: "100m"
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true

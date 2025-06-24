@@ -1,0 +1,37 @@
+# Dockerfile for stratum Discord bot instances
+FROM rust:1.87 as builder
+
+WORKDIR /app
+
+# Copy the workspace manifests
+COPY bot/Cargo.toml bot/Cargo.lock ./
+COPY bot/ ./bot/
+
+# Build stratum
+WORKDIR /app/bot
+RUN cargo build --release --package stratum
+
+# Runtime stage
+FROM debian:bookworm-slim
+
+# Install runtime dependencies
+RUN apt-get update && apt-get install -y \
+    ca-certificates \
+    libssl3 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create a non-root user
+RUN useradd -r -u 1000 stratum
+
+# Copy the binary
+COPY --from=builder /app/bot/target/release/stratum /usr/local/bin/stratum
+
+# Change ownership and make executable
+RUN chown stratum:stratum /usr/local/bin/stratum && \
+    chmod +x /usr/local/bin/stratum
+
+# Switch to non-root user
+USER stratum
+
+# Set the binary as the entrypoint
+ENTRYPOINT ["/usr/local/bin/stratum"]

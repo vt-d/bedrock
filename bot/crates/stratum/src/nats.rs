@@ -1,7 +1,7 @@
 use anyhow::Result;
 use async_nats;
-use backoff::{future::retry, Error as BackoffError, ExponentialBackoff};
-use tracing::{error, info, span, Level};
+use backoff::{Error as BackoffError, ExponentialBackoff, future::retry};
+use tracing::{Level, error, info, span};
 
 pub async fn connect(url: &str) -> Result<async_nats::Client> {
     let operation = || async {
@@ -33,6 +33,9 @@ pub async fn setup_jetstream(client: &async_nats::Client) -> Result<()> {
 
     info!("ensuring 'discord-events' stream exists");
 
+    // First, let's try to check if JetStream is available by creating the stream directly
+    info!("Checking JetStream availability...");
+
     let stream_op = || async {
         jetstream
             .get_or_create_stream(async_nats::jetstream::stream::Config {
@@ -48,12 +51,16 @@ pub async fn setup_jetstream(client: &async_nats::Client) -> Result<()> {
             })
     };
 
-    let backoff = ExponentialBackoff::default();
+    let mut backoff = ExponentialBackoff::default();
+    backoff.max_elapsed_time = Some(std::time::Duration::from_secs(300)); // 5 minutes
     if let Err(e) = retry(backoff, stream_op).await {
         error!(stream.name = "discord-events", error = %e, "failed to get or create jetstream stream after all retries");
         return Err(e.into());
     }
-    info!(stream.name = "discord-events", "ensured jetstream stream exists");
+    info!(
+        stream.name = "discord-events",
+        "ensured jetstream stream exists"
+    );
 
     let publish_op = || async {
         client

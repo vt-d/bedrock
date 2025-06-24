@@ -1,6 +1,0 @@
-apiVersion: v2
-name: nats-cluster
-description: A Helm chart for NATS cluster deployment
-type: application
-version: 0.1.0
-appVersion: "2.10.7"

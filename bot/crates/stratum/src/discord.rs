@@ -22,10 +22,10 @@ pub struct ShardManagerConfig {
 /// overall configuration.
 pub fn new_shard_manager_config(config: &Config) -> Result<ShardManagerConfig> {
     let gateway_config = Arc::new(
-        GatewayConfigBuilder::new(config.discord_token.clone(), Intents::empty()).build(),
+        GatewayConfigBuilder::new(config.discord_token.clone(), Intents::GUILD_MESSAGES).build(),
     );
 
-    let shard_ids = config.shard_id_start..config.shard_id_end;
+    let shard_ids = config.shard_id_start..config.shard_id_end + 1;
 
     Ok(ShardManagerConfig {
         gateway_config,

@@ -1,12 +1,16 @@
 use anyhow::Result;
 use async_nats;
-use backoff::{future::retry, Error as BackoffError, ExponentialBackoff};
+use backoff::{Error as BackoffError, ExponentialBackoff, future::retry};
 use futures_util::StreamExt;
-use tracing::{error, info, span, trace, Level};
-use twilight_gateway::{error::ReceiveMessageErrorType, Message, Shard};
+use tracing::{Level, error, info, span, trace};
+use twilight_gateway::{Message, Shard, error::ReceiveMessageErrorType};
 
 pub async fn runner(mut shard: Shard, nats_client: async_nats::Client) -> Result<()> {
-    let runner_span = span!(Level::INFO, "discord_shard_runner", shard.id = shard.id().number());
+    let runner_span = span!(
+        Level::INFO,
+        "discord_shard_runner",
+        shard.id = shard.id().number()
+    );
     let _enter = runner_span.enter();
 
     info!("Starting Discord shard runner");
@@ -23,7 +27,10 @@ pub async fn runner(mut shard: Shard, nats_client: async_nats::Client) -> Result
 
     let backoff = ExponentialBackoff::default();
     retry(backoff, publish_op).await?;
-    info!(shard.id = shard.id().number(), "Published shard startup message to NATS");
+    info!(
+        shard.id = shard.id().number(),
+        "Published shard startup message to NATS"
+    );
 
     while let Some(event) = shard.next().await {
         let event_span = span!(Level::TRACE, "discord_event_handling");
