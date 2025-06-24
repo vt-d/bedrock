@@ -1,16 +1,8 @@
 name: Build and Push Crust Operator
 
 on:
-  push:
-    branches: [ main ]
-    paths:
-      - 'bot/crates/crust/**'
-      - 'Dockerfile.crust'
-  pull_request:
-    branches: [ main ]
-    paths:
-      - 'bot/crates/crust/**'
-      - 'Dockerfile.crust'
+  release:
+    types: [created]
 
 env:
   REGISTRY: ghcr.io
