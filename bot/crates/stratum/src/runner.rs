@@ -5,6 +5,47 @@ use futures_util::StreamExt;
 use tracing::{Level, error, info, span, trace};
 use twilight_gateway::{Message, Shard, error::ReceiveMessageErrorType};
 
+/// Runs a Discord shard and forwards events to NATS.
+/// 
+/// This function is the core event processing loop for a Discord shard. It:
+/// 1. Publishes a startup message to NATS indicating the shard is starting
+/// 2. Continuously processes Discord gateway events
+/// 3. Forwards all text messages to NATS JetStream for consumption by other services
+/// 4. Handles reconnection scenarios and errors gracefully
+/// 
+/// The runner publishes events to subject patterns:
+/// - `discord.shards.{shard_id}.startup` - Shard startup notifications
+/// - `discord.shards.{shard_id}.events` - All Discord gateway events
+/// 
+/// # Arguments
+/// 
+/// * `shard` - The Discord gateway shard to run
+/// * `nats_client` - NATS client for publishing events
+/// 
+/// # Returns
+/// 
+/// * `Ok(())` - If the shard shuts down gracefully
+/// * `Err(anyhow::Error)` - If an unrecoverable error occurs
+/// 
+/// # Error Handling
+/// 
+/// - **Reconnect errors**: Function returns to allow restart by caller
+/// - **Publish errors**: Retried with exponential backoff
+/// - **Other gateway errors**: Logged but processing continues
+/// 
+/// # Examples
+/// 
+/// ```no_run
+/// use stratum::{runner::runner, nats::connect};
+/// use twilight_gateway::Shard;
+/// use twilight_model::gateway::ShardId;
+/// 
+/// let shard = Shard::new(ShardId::new(0, 1), "token".to_string(), Default::default());
+/// let nats_client = connect("nats://localhost:4222").await.unwrap();
+/// 
+/// // This will run indefinitely until an error occurs
+/// runner(shard, nats_client).await.unwrap();
+/// ```
 pub async fn runner(mut shard: Shard, nats_client: async_nats::Client) -> Result<()> {
     let runner_span = span!(
         Level::INFO,
