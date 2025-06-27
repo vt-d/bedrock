@@ -125,7 +125,7 @@ metadata:
 spec:
   discord_token_secret: "discord-token"
   nats_url: "nats://nats-cluster.nats-system.svc.cluster.local:4222"
-  image: "ghcr.io/vt-d/bedrock/stratum:sha-10bbaa3"  # Production: Use tagged version
+  image: "ghcr.io/vt-d/bedrock/stratum:sha-4530824"  # Production: Use tagged version
   replicas_per_shard_group: 2   # Production: 2 replicas per shard group for HA
   shards_per_replica: 8         # Production: More shards per replica for efficiency
   reshard_interval_hours: 12    # Production: More frequent resharding
