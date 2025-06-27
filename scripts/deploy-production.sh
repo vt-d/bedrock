@@ -125,17 +125,10 @@ metadata:
 spec:
   discord_token_secret: "discord-token"
   nats_url: "nats://nats-cluster.nats-system.svc.cluster.local:4222"
-  image: "stratum:latest"  # Production: Use tagged version
+  image: "ghcr.io/vt-d/bedrock/stratum:sha-10bbaa3"  # Production: Use tagged version
   replicas_per_shard_group: 2   # Production: 2 replicas per shard group for HA
   shards_per_replica: 8         # Production: More shards per replica for efficiency
   reshard_interval_hours: 12    # Production: More frequent resharding
-  resources:
-    requests:
-      memory: "1Gi"             # Production: Increased memory
-      cpu: "500m"               # Production: Increased CPU
-    limits:
-      memory: "2Gi"             # Production: Higher memory limit
-      cpu: "1000m"              # Production: Higher CPU limit
 EOF
     
     print_success "Production Bedrock bot cluster deployed"
