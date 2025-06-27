@@ -1,0 +1,16 @@
+[package]
+name = "stratum-shard-manager"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+stratum-config = { path = "../stratum-config" }
+stratum-coordination = { path = "../stratum-coordination" }
+stratum-discord = { path = "../stratum-discord" }
+stratum-runner = { path = "../stratum-runner" }
+async-nats = { workspace = true }
+tokio = { workspace = true }
+tracing = { workspace = true }
+twilight-gateway = { workspace = true }
+twilight-model = { workspace = true }
+anyhow = { workspace = true }

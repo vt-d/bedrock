@@ -56,7 +56,7 @@ metadata:
     app: nats
 spec:
   serviceName: nats
-  replicas: 3
+  replicas: 3  # Production: 3 replicas for high availability
   selector:
     matchLabels:
       app: nats
@@ -101,11 +101,11 @@ spec:
             mountPath: /data
         resources:
           requests:
-            cpu: 100m
-            memory: 128Mi
+            cpu: 500m      # Production: Increased CPU for better performance
+            memory: 512Mi   # Production: Increased memory for better performance
           limits:
-            cpu: 200m
-            memory: 256Mi
+            cpu: 1000m     # Production: Higher CPU limit
+            memory: 1Gi    # Production: Higher memory limit
         livenessProbe:
           httpGet:
             path: /
@@ -138,7 +138,7 @@ spec:
       - ReadWriteOnce
       resources:
         requests:
-          storage: 1Gi
+          storage: 10Gi  # Production: Increased storage for better performance
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -154,8 +154,8 @@ data:
     
     jetstream {
         store_dir: "/data"
-        max_memory_store: 256MB
-        max_file_store: 2GB
+        max_memory_store: 512MB  # Production: Increased memory store
+        max_file_store: 10GB     # Production: Increased file store
     }
     
     cluster {

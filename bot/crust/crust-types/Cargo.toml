@@ -1,0 +1,16 @@
+[package]
+name = "crust-types"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+chrono = { workspace = true }
+kube = { workspace = true }
+k8s-openapi = { workspace = true }
+schemars = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+async-nats = { workspace = true }
+twilight-http = { workspace = true }
+anyhow = { workspace = true }

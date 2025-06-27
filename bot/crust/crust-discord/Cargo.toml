@@ -1,0 +1,9 @@
+[package]
+name = "crust-discord"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+crust-types = { path = "../crust-types" }
+twilight-http = { workspace = true }
+tracing = { workspace = true }

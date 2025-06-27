@@ -1,37 +1,38 @@
-# Dockerfile for stratum Discord bot instances
-FROM rust:1.87 as builder
+FROM rust:1.87-slim AS builder
 
 WORKDIR /app
 
-# Copy the workspace manifests
-COPY bot/Cargo.toml bot/Cargo.lock ./
-COPY bot/ ./bot/
+# Install required dependencies
+RUN apt-get update && apt-get install -y \
+    pkg-config \
+    libssl-dev \
+    && rm -rf /var/lib/apt/lists/*
 
-# Build stratum
-WORKDIR /app/bot
-RUN cargo build --release --package stratum
+# Copy workspace files
+COPY bot/stratum/Cargo.toml ./
+COPY bot/stratum/stratum-coordination ./stratum-coordination
+COPY bot/stratum/stratum-shard-manager ./stratum-shard-manager
+COPY bot/stratum/stratum-discord ./stratum-discord
+COPY bot/stratum/stratum-runner ./stratum-runner
+COPY bot/stratum/stratum-config ./stratum-config
+COPY bot/stratum/stratum-nats ./stratum-nats
+COPY bot/stratum/stratum-main ./stratum-main
 
-# Runtime stage
+# copy util library
+COPY bot/util/Cargo.toml ./util/
+
+# Build the application
+RUN cargo build --release --bin stratum
+
 FROM debian:bookworm-slim
 
 # Install runtime dependencies
 RUN apt-get update && apt-get install -y \
     ca-certificates \
-    libssl3 \
     && rm -rf /var/lib/apt/lists/*
 
-# Create a non-root user
-RUN useradd -r -u 1000 stratum
-
 # Copy the binary
-COPY --from=builder /app/bot/target/release/stratum /usr/local/bin/stratum
-
-# Change ownership and make executable
-RUN chown stratum:stratum /usr/local/bin/stratum && \
-    chmod +x /usr/local/bin/stratum
-
-# Switch to non-root user
-USER stratum
+COPY --from=builder /app/target/release/stratum /usr/local/bin/stratum
 
 # Set the binary as the entrypoint
 ENTRYPOINT ["/usr/local/bin/stratum"]

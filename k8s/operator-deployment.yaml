@@ -2,9 +2,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: crust-operator
-  namespace: default
+  namespace: bedrock
 spec:
-  replicas: 1
+  replicas: 2  # Production: Multiple replicas for high availability
   selector:
     matchLabels:
       app: crust-operator
@@ -16,20 +16,29 @@ spec:
       serviceAccountName: crust-operator
       containers:
       - name: operator
-        image: bedrock-operator:latest
-        imagePullPolicy: Never
+        image: ghcr.io/vt-d/bedrock/crust:latest  # Production: Use tagged version instead of latest
+        imagePullPolicy: Never    # Production: Use IfNotPresent for tagged images
         env:
+        - name: DISCORD_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: discord-token
+              key: token
+        - name: LEADER_ELECTION_ENABLED
+          value: "true"  # Production: Enable leader election for multiple replicas
+        - name: LEADER_ELECTION_NAMESPACE
+          value: "bedrock"
         - name: NATS_URL
           value: "nats://nats-cluster.nats-system.svc.cluster.local:4222"
         - name: RUST_LOG
-          value: "info,crust=debug"
+          value: "info,crust=info"  # Production: Less verbose logging
         resources:
           requests:
-            memory: "64Mi"
-            cpu: "50m"
+            memory: "256Mi"  # Production: Increased memory for better performance
+            cpu: "200m"      # Production: Increased CPU for better performance
           limits:
-            memory: "128Mi"
-            cpu: "100m"
+            memory: "512Mi"  # Production: Higher memory limit
+            cpu: "500m"      # Production: Higher CPU limit
         securityContext:
           runAsNonRoot: true
           runAsUser: 1000

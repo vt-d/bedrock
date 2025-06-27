@@ -1,0 +1,16 @@
+[package]
+name = "crust-controller"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+crust-types = { path = "../crust-types" }
+crust-discord = { path = "../crust-discord" }
+crust-kubernetes = { path = "../crust-kubernetes" }
+crust-nats = { path = "../crust-nats" }
+chrono = { workspace = true }
+kube = { workspace = true }
+serde_json = { workspace = true }
+util = { workspace = true }
+tracing = { workspace = true }
+tokio = { workspace = true }

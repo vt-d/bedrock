@@ -1,0 +1,24 @@
+[package]
+name = "stratum-main"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "stratum"
+path = "src/main.rs"
+
+[dependencies]
+stratum-config = { path = "../stratum-config" }
+stratum-nats = { path = "../stratum-nats" }
+stratum-shard-manager = { path = "../stratum-shard-manager" }
+stratum-coordination = { path = "../stratum-coordination" }
+async-nats = { workspace = true }
+tokio = { workspace = true }
+anyhow = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+mimalloc = { workspace = true, optional = true }
+
+[features]
+mimalloc = ["dep:mimalloc"]
+default = ["mimalloc"]

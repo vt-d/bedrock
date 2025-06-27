@@ -1,0 +1,10 @@
+[package]
+name = "crust-kubernetes"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+crust-types = { path = "../crust-types" }
+kube = { workspace = true }
+k8s-openapi = { workspace = true }
+tracing = { workspace = true }

@@ -1,27 +1,22 @@
-# Build stage
-FROM rust:1.87 as builder
+FROM rust:1.87.0 AS builder
 
 WORKDIR /app
-COPY bot/Cargo.lock bot/Cargo.toml ./
-COPY bot/crates ./crates
 
-# Build the crust operator
-RUN cargo build --release --bin crust
+COPY bot/crust ./crust-workspace
+COPY bot/util ./util
 
-# Runtime stage
+WORKDIR /app/crust-workspace
+
+RUN cargo build --release
+
 FROM debian:bookworm-slim
 
 RUN apt-get update && apt-get install -y \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-# Create non-root user
-RUN useradd -r -u 1000 -m crust
+COPY --from=builder /app/crust-workspace/target/release/crust /usr/local/bin/crust
 
-# Copy the binary
-COPY --from=builder /app/target/release/crust /usr/local/bin/crust
-
-USER 1000
 EXPOSE 8080
 
 CMD ["crust"]

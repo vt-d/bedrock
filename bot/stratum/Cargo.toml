@@ -1,0 +1,17 @@
+[workspace]
+resolver = "3" # switch this to 2 if you encounter issues with the resolver
+members = [ "stratum-*"]
+
+[workspace.dependencies]  
+twilight-gateway = { git = "https://github.com/twilight-rs/twilight", branch = "main" }
+twilight-model = { git = "https://github.com/twilight-rs/twilight", branch = "main" }
+async-nats = "0.42"
+tokio = { version = "1.45.1", features = ["rt-multi-thread", "signal"] }
+anyhow = "1.0.98"
+futures-util = "0.3"
+tracing = "0.1.41"
+tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
+console-subscriber = "0.4.1"
+serde_json = "1.0.140"
+mimalloc = "0.1.47"
+backon = "1.3.0"

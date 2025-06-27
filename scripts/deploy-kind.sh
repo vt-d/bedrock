@@ -213,6 +213,11 @@ build_and_load_images() {
     docker build -f Dockerfile.stratum -t bedrock-bot:latest .
     kind load docker-image bedrock-bot:latest --name "$CLUSTER_NAME"
     
+    # Build your custom image (uncomment and modify as needed)
+    # print_status "Building your custom image..."
+    # docker build -f Dockerfile.your-app -t your-app:latest .
+    # kind load docker-image your-app:latest --name "$CLUSTER_NAME"
+    
     print_success "Docker images built and loaded"
 }
 
@@ -326,7 +331,7 @@ deploy_operator() {
     kubectl apply -f -
     
     print_status "Waiting for operator to be ready..."
-    kubectl wait --for=condition=available deployment/crust-operator --timeout=300s
+    kubectl wait --for=condition=available deployment/crust-operator -n bedrock --timeout=300s
     
     print_success "Bedrock operator deployed successfully"
 }
@@ -354,6 +359,20 @@ EOF
     print_success "Example Bedrock bot cluster deployed"
 }
 
+# Deploy your custom application
+run_proxy() {
+    print_status "Deploying your application..."
+    
+    # Apply the deployment which will use the discord-token secret
+    kubectl apply -f "$PROJECT_ROOT/k8s/twilight-gateway-proxy.yaml"
+    
+    print_status "Waiting for your app to be ready..."
+    kubectl wait --for=condition=available deployment/twilight-gateway-proxy --timeout=300s -n "$NAMESPACE"
+    
+    print_success "Your application deployed successfully"
+    print_status "Your app has access to DISCORD_TOKEN from the secret"
+}
+
 # Show status and useful commands
 show_status() {
     print_status "Deployment complete! Here's the status:"
@@ -364,7 +383,7 @@ show_status() {
     echo
     
     print_status "Operator Status:"
-    kubectl get pods -l app=crust-operator
+    kubectl get pods -l app=crust-operator -n bedrock
     echo
     
     print_status "Bedrock Bot Status:"
@@ -377,7 +396,7 @@ show_status() {
     
     print_success "Useful commands:"
     echo "# View operator logs:"
-    echo "kubectl logs -l app=crust-operator -f"
+    echo "kubectl logs -l app=crust-operator -n bedrock -f"
     echo
     echo "# View bot instance logs:"
     echo "kubectl logs -n $NAMESPACE -l app=stratum -f"
@@ -486,6 +505,7 @@ main() {
     deploy_rbac
     deploy_operator
     deploy_example_cluster
+    run_proxy
     
     echo
     print_success "🎉 Deployment completed successfully!"

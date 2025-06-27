@@ -1,0 +1,15 @@
+[workspace]
+resolver = "3"
+members = [
+    "mantle-main",
+]
+
+[workspace.dependencies]
+twilight-model = { git = "https://github.com/twilight-rs/twilight" }
+twilight-http = { git = "https://github.com/twilight-rs/twilight" }
+async-nats = "0.42.0"
+futures = "0.3.31"
+serde = "1.0.219"
+serde_json = "1.0.140"
+anyhow  = "1.0.98"
+tokio = { version = "1.45.1", features = ["rt-multi-thread", "signal"] }
