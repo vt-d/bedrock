@@ -8,6 +8,6 @@ pub static CLIENT: LazyLock<twilight_http::Client> = LazyLock::new(|| {
     twilight_http::Client::builder()
         .token(std::env::var("DISCORD_TOKEN").expect("DISCORD_TOKEN must be set"))
         .proxy(proxy_url, false)  // Production: Use HTTP proxy
-        .timeout(Duration::from_secs(30))  // Production: 30 second timeout
+        .ratelimiter(None)
         .build()
 });

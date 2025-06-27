@@ -16,8 +16,8 @@ spec:
       serviceAccountName: crust-operator
       containers:
       - name: operator
-        image: ghcr.io/vt-d/bedrock/crust:latest  # Production: Use tagged version instead of latest
-        imagePullPolicy: Never    # Production: Use IfNotPresent for tagged images
+        image: ghcr.io/vt-d/bedrock/crust:sha-4530824  # Production: Use tagged version instead of latest
+        imagePullPolicy: Always    # Production: Use IfNotPresent for tagged images
         env:
         - name: DISCORD_TOKEN
           valueFrom:
