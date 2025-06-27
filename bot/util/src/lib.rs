@@ -1,5 +1,4 @@
 use std::sync::LazyLock;
-use std::time::Duration;
 
 pub static CLIENT: LazyLock<twilight_http::Client> = LazyLock::new(|| {
     let proxy_url = std::env::var("TWILIGHT_PROXY_URL")
